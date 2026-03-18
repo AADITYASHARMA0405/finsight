@@ -306,12 +306,13 @@
             try {
                 if (isLoginMode) {
                     // --- LOGIN ---
-                    const res = await fetch('http://localhost:3000/api/auth/login', {
+                    const res = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, password })
                     });
                     const data = await res.json();
+
 
                     if (res.ok) {
                         localStorage.setItem('finsight_token', data.token);
@@ -326,7 +327,7 @@
                     }
                 } else {
                     // --- REGISTER ---
-                    const res = await fetch('http://localhost:3000/api/auth/register', {
+                    const res = await fetch('/api/auth/register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ name, email, password })
@@ -335,12 +336,13 @@
 
                     if (res.ok) {
                         // Registration success! Now automatically log them in
-                        const loginRes = await fetch('http://localhost:3000/api/auth/login', {
+                        const loginRes = await fetch('/api/auth/login', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email, password })
                         });
                         const loginData = await loginRes.json();
+
                         
                         localStorage.setItem('finsight_token', loginData.token);
                         localStorage.setItem('finsight_user', JSON.stringify(loginData.user));
@@ -360,7 +362,7 @@
                 errorDiv.style.display = 'flex';
                 
                 // Revert button based on mode
-                btn.innerHTML = \`<span id="submit-text">\${isLoginMode ? 'Sign In' : 'Create Account'}</span><i class="ph ph-arrow-right"></i>\`;
+                btn.innerHTML = `<span id="submit-text">${isLoginMode ? 'Sign In' : 'Create Account'}</span><i class="ph ph-arrow-right"></i>`;
                 btn.style.opacity = '1';
                 
                 // Shake animation
@@ -372,13 +374,13 @@
         
         // Dynamic keyframes for shake
         const style = document.createElement('style');
-        style.innerHTML = \`
+        style.innerHTML = `
             @keyframes shake {
                 0%, 100% { transform: translateX(0); }
                 25% { transform: translateX(-10px); }
                 75% { transform: translateX(10px); }
             }
-        \`;
+        `;
         document.head.appendChild(style);
     </script>
 </body>
