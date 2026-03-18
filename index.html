@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Overview</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for minimal dynamic charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Phosphor Icons for minimalist iconography -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <svg class="finsight-logo-svg" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 4H20L26 10V26C26 27.1046 25.1046 28 24 28H8C6.89543 28 6 27.1046 6 26V6C6 4.89543 6.89543 4 8 4Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M20 4V10H26" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M16 14L17.5 17.5L21 19L17.5 20.5L16 24L14.5 20.5L11 19L14.5 17.5L16 14Z" fill="#10B981">
+                        <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite" />
+                    </path>
+                    <path d="M10 10H16" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.3"/>
+                </svg>
+                <span class="brand-name">FinSight</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section-label">General</div>
+                <a href="#/dashboard" class="nav-item active" data-route="/dashboard">
+                    <i class="ph ph-squares-four"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#/documents" class="nav-item" data-route="/documents">
+                    <i class="ph ph-file-search"></i>
+                    <span>Documents</span>
+                </a>
+                <a href="#/anomalies" class="nav-item" data-route="/anomalies">
+                    <i class="ph ph-warning-circle"></i>
+                    <span>Anomalies</span>
+                    <span class="pulse-dot"></span>
+                </a>
+
+                <div class="nav-section-label">Intelligence & Compliance</div>
+                <a href="#/trends" class="nav-item" data-route="/trends">
+                    <i class="ph ph-chart-line"></i>
+                    <span>Trends</span>
+                </a>
+                <a href="#/compare" class="nav-item" data-route="/compare">
+                    <i class="ph ph-columns"></i>
+                    <span>Compare</span>
+                </a>
+                <a href="#/reports" class="nav-item" data-route="/reports">
+                    <i class="ph ph-files"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#/audit-logs" class="nav-item" data-route="/audit-logs">
+                    <i class="ph ph-list-checks"></i>
+                    <span>Audit Logs</span>
+                </a>
+
+                <div class="nav-section-label">System</div>
+                <a href="#/settings" class="nav-item" data-route="/settings">
+                    <i class="ph ph-gear"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="router-view">
+            <!-- Content will be dynamically loaded here by router.js -->
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
