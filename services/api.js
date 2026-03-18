@@ -169,5 +169,40 @@ export const api = {
             console.error("Failed fetching audit logs", e);
             return [];
         }
+    },
+
+    /**
+     * Poll document status (for upload progress tracking)
+     */
+    getDocumentStatus: async (id) => {
+        try {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/documents/${id}/status`);
+            if (!res.ok) throw new Error('API Error');
+            return await res.json();
+        } catch (e) {
+            console.error("Failed fetching doc status", e);
+            return null;
+        }
+    },
+
+    /**
+     * Upload a document to the server
+     */
+    uploadDocument: async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/documents/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) throw new Error('Upload Failed');
+            return await res.json();
+        } catch (e) {
+            console.error("Upload Error:", e);
+            throw e;
+        }
     }
 };

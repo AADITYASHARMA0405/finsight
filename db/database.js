@@ -22,39 +22,48 @@ if (isPostgres) {
 // Unified Query Interface
 const db = {
     get: (sql, params, cb) => {
+        const actualParams = typeof params === 'function' ? [] : params;
+        const actualCb = typeof params === 'function' ? params : cb;
+        
         if (isPostgres) {
-            // PostgreSQL uses $1, $2, ... for parameters
-            dbInstance.query(sql.replace(/\?/g, (m, i) => `$${++i}`), params, (err, res) => {
-                cb(err, res ? res.rows[0] : null);
+            dbInstance.query(sql.replace(/\?/g, (m, i) => `$${++i}`), actualParams, (err, res) => {
+                if (actualCb) actualCb(err, res ? res.rows[0] : null);
             });
         } else {
-            dbInstance.get(sql, params, cb);
+            dbInstance.get(sql, actualParams, actualCb);
         }
     },
     all: (sql, params, cb) => {
+        const actualParams = typeof params === 'function' ? [] : params;
+        const actualCb = typeof params === 'function' ? params : cb;
+
         if (isPostgres) {
-            dbInstance.query(sql.replace(/\?/g, (m, i) => `$${++i}`), params, (err, res) => {
-                cb(err, res ? res.rows : []);
+            dbInstance.query(sql.replace(/\?/g, (m, i) => `$${++i}`), actualParams, (err, res) => {
+                if (actualCb) actualCb(err, res ? res.rows : []);
             });
         } else {
-            dbInstance.all(sql, params, cb);
+            dbInstance.all(sql, actualParams, actualCb);
         }
     },
     run: (sql, params, cb) => {
+        const actualParams = typeof params === 'function' ? [] : params;
+        const actualCb = typeof params === 'function' ? params : cb;
+
         if (isPostgres) {
-            dbInstance.query(sql.replace(/\?/g, (m, i) => `$${++i}`), params, (err, res) => {
-                if (cb) cb(err, res);
+            dbInstance.query(sql.replace(/\?/g, (m, i) => `$${++i}`), actualParams, (err, res) => {
+                if (actualCb) actualCb(err, res);
             });
         } else {
-            dbInstance.run(sql, params, cb);
+            dbInstance.run(sql, actualParams, function(err) {
+                if (actualCb) actualCb.call(this, err);
+            });
         }
     },
     prepare: (sql) => {
-        // Prepare is a bit trickier in PG, but we'll polyfill it for seating
         return {
-            run: (...args) => {
-                const params = args.slice(0, -1);
-                const cb = args[args.length - 1];
+            run: function(...args) {
+                const params = args.filter(a => typeof a !== 'function');
+                const cb = args.find(a => typeof a === 'function');
                 db.run(sql, params, cb);
             },
             finalize: () => {}

@@ -35,8 +35,8 @@ export function renderDocuments(container) {
                 </div>
                 <h3>Upload Documents</h3>
                 <p>Drag and drop financial PDFs or CSVs here to start AI analysis</p>
-                <button class="text-btn" style="margin-top: 16px; background: var(--bg-sidebar); color: var(--text-inverse);">Select Files</button>
-                <input type="file" id="file-input" multiple style="display: none;">
+                <button class="text-btn" id="select-files-btn" style="margin-top: 16px; background: var(--bg-sidebar); color: var(--text-inverse);">Select Files</button>
+                <input type="file" id="file-input" multiple style="opacity: 0; position: absolute; pointer-events: none; width: 0; height: 0;">
             </div>
 
             <div id="upload-queue" class="upload-queue" style="display: none;">
@@ -131,6 +131,9 @@ async function initializeDocumentsLogic() {
     });
 
     try {
+        // 5. Setup Interactions (CRITICAL: Do this early so button is always live)
+        setupUploadInteractions();
+
         // 4. Load Data
         console.log('[FinSight] Fetching documents from API...');
         const fullDocs = await api.getDocuments();
@@ -138,8 +141,6 @@ async function initializeDocumentsLogic() {
         
         renderDocumentTable(fullDocs);
 
-        // 5. Setup Interactions
-        setupUploadInteractions();
         setupSearchAndFilters(fullDocs);
 
         const exportBtn = document.getElementById('export-docs-btn');
@@ -264,10 +265,21 @@ function setupUploadInteractions() {
     const zone = document.getElementById('upload-zone');
     const input = document.getElementById('file-input');
     const queue = document.getElementById('upload-queue');
+    const selectBtn = document.getElementById('select-files-btn');
+    
+    if (!zone || !input) return;
+    
+    console.log('[FinSight] Setup Upload:', { zone: !!zone, input: !!input, button: !!selectBtn });
 
-    if (!zone) return;
-
-    zone.addEventListener('click', () => input.click());
+    if (selectBtn) selectBtn.onclick = (e) => {
+        console.log('[FinSight] Select button clicked');
+        e.stopPropagation();
+        input.click();
+    };
+    
+    zone.addEventListener('click', (e) => {
+        if (e.target !== selectBtn) input.click();
+    });
 
     zone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -291,11 +303,11 @@ function setupUploadInteractions() {
         handleFiles(e.target.files);
     });
 
-    function handleFiles(files) {
+    async function handleFiles(files) {
         if (files.length === 0) return;
         queue.style.display = 'block';
         
-        Array.from(files).forEach(file => {
+        for (const file of Array.from(files)) {
             const item = document.createElement('div');
             item.className = 'upload-item';
             item.innerHTML = `
@@ -309,27 +321,69 @@ function setupUploadInteractions() {
             `;
             queue.appendChild(item);
 
-            // Animate progress
             const fill = item.querySelector('.progress-fill');
             const status = item.querySelector('.upload-status');
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 30;
-                if (progress >= 100) {
-                    progress = 100;
-                    status.textContent = 'Scanning...';
-                    fill.style.width = '100%';
-                    clearInterval(interval);
+
+            try {
+                // Phase 1: Upload
+                fill.style.width = '30%';
+                const result = await api.uploadDocument(file);
+                
+                fill.style.width = '50%';
+                status.textContent = '🔍 AI Analyzing...';
+                status.style.color = 'var(--status-warning)';
+                
+                // Phase 2: Poll for analysis completion
+                const docId = result.id;
+                let attempts = 0;
+                const maxAttempts = 30; // 60 seconds max wait
+                
+                const pollStatus = async () => {
+                    attempts++;
+                    const docStatus = await api.getDocumentStatus(docId);
                     
-                    setTimeout(() => {
-                        status.textContent = 'Analyzed';
-                        window.showToast(`${file.name} analyzed successfully`, 'success');
-                    }, 2000);
-                } else {
+                    if (docStatus && docStatus.status === 'Analyzed') {
+                        // Analysis complete!
+                        fill.style.width = '100%';
+                        status.textContent = `✅ Analyzed: ${docStatus.threatLevel}`;
+                        status.style.color = 'var(--accent-emerald)';
+                        window.showToast(`${file.name} analyzed: ${docStatus.threatLevel}`, 'success');
+                        
+                        // Refresh the documents table
+                        const updatedDocs = await api.getDocuments();
+                        renderDocumentTable(updatedDocs);
+                        setupSearchAndFilters(updatedDocs);
+                        return;
+                    }
+                    
+                    if (attempts >= maxAttempts) {
+                        fill.style.width = '100%';
+                        status.textContent = '⏳ Still Processing...';
+                        window.showToast(`${file.name} is still being analyzed`, 'info');
+                        
+                        const updatedDocs = await api.getDocuments();
+                        renderDocumentTable(updatedDocs);
+                        setupSearchAndFilters(updatedDocs);
+                        return;
+                    }
+                    
+                    // Still scanning - update progress bar and try again
+                    const progress = 50 + Math.min(45, attempts * 3);
                     fill.style.width = `${progress}%`;
-                }
-            }, 500);
-        });
+                    setTimeout(pollStatus, 2000);
+                };
+
+                // Start polling after a brief delay (give the AI time to start)
+                setTimeout(pollStatus, 2000);
+
+            } catch (err) {
+                console.error("Upload failed for", file.name, err);
+                status.textContent = '❌ Failed';
+                status.style.color = 'var(--accent-red)';
+                fill.style.backgroundColor = 'var(--accent-red)';
+                window.showToast(`Failed to upload ${file.name}`, 'warning');
+            }
+        }
     }
 }
 
@@ -465,7 +519,7 @@ function ensureDocumentStyles() {
         style.id = 'document-view-styles';
         style.textContent = `
             .upload-zone {
-                border: 2px solid var(--border-light);
+                background-color: var(--bg-main);
                 border-radius: 12px;
                 padding: 48px;
                 text-align: center;
@@ -474,8 +528,7 @@ function ensureDocumentStyles() {
                 margin-bottom: 24px;
             }
             .upload-zone:hover {
-                border-color: var(--text-secondary);
-                background-color: var(--bg-main);
+                background-color: rgba(16, 185, 129, 0.05);
             }
             .upload-icon {
                 font-size: 3rem;

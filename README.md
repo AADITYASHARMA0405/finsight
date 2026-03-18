@@ -3,7 +3,7 @@
 **FinSight** is a high-performance Financial Intelligence & Document Analysis platform. It leverages AI to extract actionable insights from PDFs and CSVs, featuring a sleek, glassmorphic dashboard built with vanilla web technologies and a Node.js/SQLite backend.
 
 ## ✨ Features
-- **AI-Powered Analysis**: Integrated with Google Gemini 1.5 Flash for real-time document intelligence.
+- **AI-Powered Analysis**: Integrated with Google Gemini 2.0 Flash for real-time document intelligence.
 - **Secure Sessions**: JWT-based authentication with bcrypt password hashing.
 - **Dynamic Dashboard**: Responsive KPI cards, financial metrics charts (Chart.js), and animated stat counters.
 - **Modular Architecture**: Clean separation between frontend views, services, and the Express backend.
@@ -35,7 +35,7 @@
 - **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (ES6+), Phosphor Icons, Chart.js.
 - **Backend**: Node.js, Express.
 - **Database**: SQLite (PostgreSQL migration planned for Phase 3).
-- **AI**: Google Gemini 1.5 Flash.
+- **AI**: Google Gemini 2.0 Flash.
 
 ## 📄 License
 This project is licensed under the ISC License.
