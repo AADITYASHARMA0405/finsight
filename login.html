@@ -30,14 +30,14 @@
         .blob-1 {
             width: 500px;
             height: 500px;
-            background: var(--accent-emerald);
+            background: #2563EB; /* Deep Blue instead of Emerald */
             top: -100px;
             right: -100px;
         }
         .blob-2 {
             width: 400px;
             height: 400px;
-            background: var(--accent-blue);
+            background: #4F46E5; /* Indigo */
             bottom: -50px;
             left: -100px;
             animation-delay: -5s;
@@ -81,7 +81,7 @@
         }
 
         .login-logo i {
-            color: var(--accent-emerald);
+            color: var(--text-primary); /* Slate instead of Emerald */
             font-size: 2.2rem;
         }
 
@@ -132,14 +132,14 @@
 
         .input-wrapper input:focus {
             outline: none;
-            border-color: var(--accent-emerald);
-            box-shadow: 0 0 0 4px rgba(0, 200, 150, 0.1);
+            border-color: var(--text-primary); /* Slate */
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
         }
 
         .login-btn {
             width: 100%;
             padding: 16px;
-            background: var(--accent-emerald);
+            background: var(--bg-sidebar); /* Dark Slate / Navy */
             color: #ffffff;
             border: none;
             border-radius: 12px;
@@ -156,13 +156,31 @@
         }
 
         .login-btn:hover {
-            background: #00b386;
+            background: var(--text-primary);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(0, 200, 150, 0.5);
+            box-shadow: 0 10px 20px -10px rgba(15, 23, 42, 0.5);
         }
         
         .login-btn:active {
             transform: translateY(0);
+        }
+
+        .toggle-mode {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .toggle-mode a {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .toggle-mode a:hover {
+            text-decoration: underline;
         }
 
         .error-message {
@@ -189,20 +207,29 @@
                 <i class="ph ph-sparkle"></i>
                 FinSight
             </div>
-            <p>Sign in to access secure financial intelligence</p>
+            <p id="header-desc">Create an account to start your journey</p>
         </div>
 
         <div id="error-msg" class="error-message">
             <i class="ph ph-warning-circle"></i>
-            <span id="error-text">Invalid login credentials</span>
+            <span id="error-text">Invalid credentials</span>
         </div>
 
-        <form id="login-form">
+        <form id="auth-form">
+            <!-- Name field is only visible for registration -->
+            <div class="form-group" id="name-group">
+                <label for="name">Full Name</label>
+                <div class="input-wrapper">
+                    <i class="ph ph-user"></i>
+                    <input type="text" id="name" placeholder="Sarah Connor">
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <div class="input-wrapper">
                     <i class="ph ph-envelope-simple"></i>
-                    <input type="email" id="email" placeholder="admin@finsight.io" required value="admin@finsight.io">
+                    <input type="email" id="email" placeholder="admin@finsight.io" required>
                 </div>
             </div>
 
@@ -210,61 +237,130 @@
                 <label for="password">Password</label>
                 <div class="input-wrapper">
                     <i class="ph ph-lock-key"></i>
-                    <input type="password" id="password" placeholder="••••••••" required value="admin123">
+                    <input type="password" id="password" placeholder="••••••••" required>
                 </div>
             </div>
 
             <button type="submit" class="login-btn" id="submit-btn">
-                <span>Authenticate</span>
+                <span id="submit-text">Create Account</span>
                 <i class="ph ph-arrow-right"></i>
             </button>
+
+            <div class="toggle-mode">
+                <span id="toggle-prompt">Already have an account?</span> 
+                <a id="toggle-link">Sign In</a>
+            </div>
         </form>
     </div>
 
     <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        let isLoginMode = false; // Default to Create Account
+
+        const form = document.getElementById('auth-form');
+        const nameGroup = document.getElementById('name-group');
+        const nameInput = document.getElementById('name');
+        const headerDesc = document.getElementById('header-desc');
+        const submitText = document.getElementById('submit-text');
+        const togglePrompt = document.getElementById('toggle-prompt');
+        const toggleLink = document.getElementById('toggle-link');
+        const errorDiv = document.getElementById('error-msg');
+        const errorText = document.getElementById('error-text');
+        const btn = document.getElementById('submit-btn');
+
+        // Toggle between Login and Register
+        toggleLink.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            errorDiv.style.display = 'none';
+
+            if (isLoginMode) {
+                // Switch to Login
+                nameGroup.style.display = 'none';
+                nameInput.removeAttribute('required');
+                headerDesc.textContent = 'Sign in to access secure financial intelligence';
+                submitText.textContent = 'Sign In';
+                togglePrompt.textContent = 'New to FinSight?';
+                toggleLink.textContent = 'Create an Account';
+            } else {
+                // Switch to Register
+                nameGroup.style.display = 'block';
+                nameInput.setAttribute('required', 'true');
+                headerDesc.textContent = 'Create an account to start your journey';
+                submitText.textContent = 'Create Account';
+                togglePrompt.textContent = 'Already have an account?';
+                toggleLink.textContent = 'Sign In';
+            }
+        });
+
+        // Handle Submission
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const btn = document.getElementById('submit-btn');
-            const errorDiv = document.getElementById('error-msg');
-            const errorText = document.getElementById('error-text');
+            const name = document.getElementById('name').value;
 
             // Reset UI
             errorDiv.style.display = 'none';
-            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Authenticating...';
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Processing...';
             btn.style.opacity = '0.7';
 
             try {
-                const res = await fetch('http://localhost:3000/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+                if (isLoginMode) {
+                    // --- LOGIN ---
+                    const res = await fetch('http://localhost:3000/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
 
-                const data = await res.json();
-
-                if (res.ok) {
-                    // Success! Store token and user
-                    localStorage.setItem('finsight_token', data.token);
-                    localStorage.setItem('finsight_user', JSON.stringify(data.user));
-                    
-                    btn.innerHTML = '<i class="ph ph-check-circle"></i> Success';
-                    btn.style.background = 'var(--status-positive)';
-                    
-                    // Redirect to dashboard
-                    setTimeout(() => {
-                        window.location.href = 'index.html#/dashboard';
-                    }, 500);
+                    if (res.ok) {
+                        localStorage.setItem('finsight_token', data.token);
+                        localStorage.setItem('finsight_user', JSON.stringify(data.user));
+                        
+                        btn.innerHTML = '<i class="ph ph-check-circle"></i> Success';
+                        btn.style.background = 'var(--status-positive)';
+                        
+                        setTimeout(() => window.location.href = 'index.html#/dashboard', 500);
+                    } else {
+                        throw new Error(data.error || 'Authentication failed');
+                    }
                 } else {
-                    // Fail
-                    throw new Error(data.error || 'Authentication failed');
+                    // --- REGISTER ---
+                    const res = await fetch('http://localhost:3000/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        // Registration success! Now automatically log them in
+                        const loginRes = await fetch('http://localhost:3000/api/auth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+                        const loginData = await loginRes.json();
+                        
+                        localStorage.setItem('finsight_token', loginData.token);
+                        localStorage.setItem('finsight_user', JSON.stringify(loginData.user));
+                        
+                        btn.innerHTML = '<i class="ph ph-check-circle"></i> Account Created';
+                        btn.style.background = 'var(--status-positive)';
+                        
+                        setTimeout(() => window.location.href = 'index.html#/dashboard', 500);
+                        
+                    } else {
+                        throw new Error(data.error || 'Registration failed');
+                    }
                 }
             } catch (err) {
                 console.error(err);
                 errorText.textContent = err.message;
                 errorDiv.style.display = 'flex';
-                btn.innerHTML = '<span>Authenticate</span><i class="ph ph-arrow-right"></i>';
+                
+                // Revert button based on mode
+                btn.innerHTML = \`<span id="submit-text">\${isLoginMode ? 'Sign In' : 'Create Account'}</span><i class="ph ph-arrow-right"></i>\`;
                 btn.style.opacity = '1';
                 
                 // Shake animation
@@ -276,13 +372,13 @@
         
         // Dynamic keyframes for shake
         const style = document.createElement('style');
-        style.innerHTML = `
+        style.innerHTML = \`
             @keyframes shake {
                 0%, 100% { transform: translateX(0); }
                 25% { transform: translateX(-10px); }
                 75% { transform: translateX(10px); }
             }
-        `;
+        \`;
         document.head.appendChild(style);
     </script>
 </body>
