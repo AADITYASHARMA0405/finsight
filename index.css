@@ -31,6 +31,30 @@
     --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ==========================================================================
+   Dark Theme Overrides
+   - Keeps pure minimal style: solid blacks, grays, and the indigo accent.
+   ========================================================================== */
+body.dark-theme {
+    --bg-main: #020617; /* Very Dark Slate */
+    --bg-surface: #0F172A; /* Dark Slate */
+    --bg-sidebar: #020617; 
+    
+    /* Text Colors */
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-inverse: #020617;
+    --text-inverse-muted: #64748B;
+    
+    /* Borders */
+    --border-light: 1px solid rgba(30, 41, 59, 0.5);
+    
+    /* Shadows - Disabled for ultra-flat dark mode */
+    --shadow-subtle: none;
+    --shadow-premium: none;
+}
+
+
 /* Base Refinements */
 html {
     scroll-behavior: smooth;

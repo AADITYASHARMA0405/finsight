@@ -25,10 +25,8 @@ export function renderOverview(container) {
                     <span>Search or type command...</span>
                     <div class="search-hint">⌘K</div>
                 </div>
-                <button class="icon-btn theme-toggle-btn" id="header-theme-toggle" aria-label="Toggle Theme">
-                    <i class="ph ph-moon"></i>
-                </button>
                 <button class="text-btn" id="customize-dashboard-btn" style="border: 1px solid var(--border-light); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+
                     <i class="ph ph-sliders"></i> Customize
                 </button>
                 <button class="icon-btn" aria-label="Notifications" id="notification-btn">
@@ -213,36 +211,9 @@ async function initializeOverviewLogic() {
     ]);
 
     setupCustomization();
-    setupHeaderThemeToggle();
 }
 
-function setupHeaderThemeToggle() {
-    const btn = document.getElementById('header-theme-toggle');
-    if (!btn) return;
 
-    const updateIcon = () => {
-        const icon = btn.querySelector('i');
-        if (document.body.classList.contains('dark-theme')) {
-            icon.className = 'ph ph-sun';
-        } else {
-            icon.className = 'ph ph-moon';
-        }
-    };
-
-    updateIcon();
-
-    btn.onclick = () => {
-        document.body.classList.toggle('dark-theme');
-        const isDark = document.body.classList.contains('dark-theme');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        updateIcon();
-        // Sync with search palette if open
-        window.dispatchEvent(new Event('themeChanged'));
-    };
-    
-    // Listen for theme changes from other sources (e.g. palette or settings)
-    window.addEventListener('themeChanged', updateIcon);
-}
 
 async function populateKPIs() {
     const data = await api.getOverviewKPIs();

@@ -24,9 +24,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchService = initCommandPalette();
 
     // Theme Persistence Layer
+    const themeToggle = document.getElementById('global-theme-toggle');
     const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme');
+    
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-theme');
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('i');
+                const text = themeToggle.querySelector('span');
+                if (icon) icon.className = 'ph ph-sun';
+                if (text) text.textContent = 'Light Mode';
+            }
+        } else {
+            document.body.classList.remove('dark-theme');
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('i');
+                const text = themeToggle.querySelector('span');
+                if (icon) icon.className = 'ph ph-moon';
+                if (text) text.textContent = 'Dark Mode';
+            }
+        }
+    };
+
+    applyTheme(savedTheme);
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark-theme');
+            const newTheme = isDark ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+            window.dispatchEvent(new Event('themeChanged'));
+        });
+    }
+
+    // Global Logout from Sidebar
+    const sidebarLogout = document.getElementById('sidebar-logout-btn');
+    if (sidebarLogout) {
+        sidebarLogout.onclick = () => {
+            localStorage.removeItem('finsight_token');
+            localStorage.removeItem('finsight_user');
+            window.location.href = 'login.html';
+        };
     }
 
     // Global Command Palette Shortcut Listener (K) is already in search.js
