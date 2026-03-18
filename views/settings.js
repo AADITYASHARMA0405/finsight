@@ -46,17 +46,17 @@ export function renderSettings(container) {
                     <div class="form-row">
                         <div class="form-group flex-1">
                             <label>First Name</label>
-                            <input type="text" id="setting-fname" class="form-input" value="Sarah">
+                            <input type="text" id="setting-fname" class="form-input" placeholder="First Name">
                         </div>
                         <div class="form-group flex-1">
                             <label>Last Name</label>
-                            <input type="text" id="setting-lname" class="form-input" value="Connor">
+                            <input type="text" id="setting-lname" class="form-input" placeholder="Last Name">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" id="setting-email" class="form-input" value="sarah@finsight.io">
+                        <input type="email" id="setting-email" class="form-input" placeholder="Email Address">
                     </div>
                 </div>
             </div>
@@ -127,9 +127,28 @@ function initializeSettingsLogic() {
     const photoBtn = document.getElementById('change-photo-btn');
     const profileImg = document.getElementById('profile-img-preview');
 
-    if (fNameInput) fNameInput.value = localStorage.getItem('user_fname') || 'Sarah';
-    if (lNameInput) lNameInput.value = localStorage.getItem('user_lname') || 'Connor';
-    if (emailInput) emailInput.value = localStorage.getItem('user_email') || 'sarah@finsight.io';
+    // Extract logged in user data
+    let defaultFirstName = 'User';
+    let defaultLastName = '';
+    let defaultEmail = '';
+    
+    try {
+        const storedUser = JSON.parse(localStorage.getItem('finsight_user'));
+        if (storedUser) {
+            defaultEmail = storedUser.email || '';
+            if (storedUser.name) {
+                const nameParts = storedUser.name.split(' ');
+                defaultFirstName = nameParts[0];
+                defaultLastName = nameParts.slice(1).join(' ');
+            }
+        }
+    } catch (e) {
+        console.error("Could not parse user data");
+    }
+
+    if (fNameInput) fNameInput.value = localStorage.getItem('user_fname') || defaultFirstName;
+    if (lNameInput) lNameInput.value = localStorage.getItem('user_lname') || defaultLastName;
+    if (emailInput) emailInput.value = localStorage.getItem('user_email') || defaultEmail;
     if (notifToggle) notifToggle.checked = localStorage.getItem('user_notifs') !== 'false';
     if (profileImg) profileImg.src = localStorage.getItem('user_photo') || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80';
 
