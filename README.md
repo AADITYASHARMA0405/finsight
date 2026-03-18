@@ -1,6 +1,6 @@
 # FinSight
 
-FinSight is a high-performance Financial Intelligence & Document Analysis platform. It leverages AI to extract actionable insights from PDFs and CSVs, featuring a sleek, glassmorphic dashboard built with vanilla web technologies and a Node.js/SQLite backend.
+FinSight is a high-performance Financial Intelligence & Document Analysis platform. It leverages AI to extract actionable insights from PDFs and CSVs, featuring a sleek dashboard built with vanilla web technologies and a Node.js/SQLite backend.
 
 ## Project Architecture
 
