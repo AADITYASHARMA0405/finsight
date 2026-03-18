@@ -3,7 +3,10 @@
    Simulates asynchronous network requests with artificial latency.
    ========================================================================== */
 
-const DELAY = 800; // Simulated network latency in ms
+const DELAY = 800;
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : 'https://finsight-backend.onrender.com'; // Replace with your actual Render URL
 
 // ==========================================================================
 // Authentication Helper
@@ -40,7 +43,7 @@ export const api = {
      */
     getOverviewKPIs: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/dashboard/kpis');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/dashboard/kpis`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
@@ -54,7 +57,7 @@ export const api = {
      */
     getRevenueChartData: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/dashboard/revenue');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/dashboard/revenue`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
@@ -68,7 +71,7 @@ export const api = {
      */
     getRecentTransactions: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/dashboard/transactions');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/dashboard/transactions`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
@@ -82,7 +85,7 @@ export const api = {
      */
     getFullTransactions: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/transactions/full');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/transactions/full`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
@@ -93,7 +96,7 @@ export const api = {
 
     getCustomers: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/customers');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/customers`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
@@ -104,7 +107,7 @@ export const api = {
 
     getDocuments: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/documents');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/documents`);
             if (!res.ok) throw new Error('API Error');
             const data = await res.json();
             // Format data slightly to match what UI expects
@@ -127,7 +130,7 @@ export const api = {
 
     getDocumentDetails: async (id) => {
         try {
-            const res = await fetchWithAuth(`http://localhost:3000/api/documents/${id}/details`);
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/documents/${id}/details`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
@@ -143,7 +146,7 @@ export const api = {
 
     askAI: async (query, docId) => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/ai/query', {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/ai/query`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query, docId })
@@ -159,7 +162,7 @@ export const api = {
 
     getAuditLogs: async () => {
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/audit-logs');
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/audit-logs`);
             if (!res.ok) throw new Error('API Error');
             return await res.json();
         } catch (e) {
