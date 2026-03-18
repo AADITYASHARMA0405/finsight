@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FinSight Intelligence</title>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--bg-main);
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Abstract Background Elements */
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+        .blob-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-emerald);
+            top: -100px;
+            right: -100px;
+        }
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-blue);
+            bottom: -50px;
+            left: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 48px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            /* Optional Glassmorphism */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .login-logo i {
+            color: var(--accent-emerald);
+            font-size: 2.2rem;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: var(--text-inverse-muted);
+            font-size: 1.25rem;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent-emerald);
+            box-shadow: 0 0 0 4px rgba(0, 200, 150, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent-emerald);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+        }
+
+        .login-btn:hover {
+            background: #00b386;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(0, 200, 150, 0.5);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: var(--status-negative);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="ph ph-sparkle"></i>
+                FinSight
+            </div>
+            <p>Sign in to access secure financial intelligence</p>
+        </div>
+
+        <div id="error-msg" class="error-message">
+            <i class="ph ph-warning-circle"></i>
+            <span id="error-text">Invalid login credentials</span>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <i class="ph ph-envelope-simple"></i>
+                    <input type="email" id="email" placeholder="admin@finsight.io" required value="admin@finsight.io">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <i class="ph ph-lock-key"></i>
+                    <input type="password" id="password" placeholder="••••••••" required value="admin123">
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="submit-btn">
+                <span>Authenticate</span>
+                <i class="ph ph-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('error-msg');
+            const errorText = document.getElementById('error-text');
+
+            // Reset UI
+            errorDiv.style.display = 'none';
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Authenticating...';
+            btn.style.opacity = '0.7';
+
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Success! Store token and user
+                    localStorage.setItem('finsight_token', data.token);
+                    localStorage.setItem('finsight_user', JSON.stringify(data.user));
+                    
+                    btn.innerHTML = '<i class="ph ph-check-circle"></i> Success';
+                    btn.style.background = 'var(--status-positive)';
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'index.html#/dashboard';
+                    }, 500);
+                } else {
+                    // Fail
+                    throw new Error(data.error || 'Authentication failed');
+                }
+            } catch (err) {
+                console.error(err);
+                errorText.textContent = err.message;
+                errorDiv.style.display = 'flex';
+                btn.innerHTML = '<span>Authenticate</span><i class="ph ph-arrow-right"></i>';
+                btn.style.opacity = '1';
+                
+                // Shake animation
+                const container = document.querySelector('.login-container');
+                container.style.animation = 'shake 0.4s ease-in-out';
+                setTimeout(() => container.style.animation = '', 400);
+            }
+        });
+        
+        // Dynamic keyframes for shake
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
