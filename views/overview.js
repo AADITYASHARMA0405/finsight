@@ -407,14 +407,8 @@ function ensureStyles() {
                 padding-left: 8px; /* Prevent Y-axis label clipping */
             }
 
-            .kpi-card {
-                background-color: #1E2433 !important; /* Refined dark blue */
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.08) !important;
-                box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
-            }
-
             .severity-pill {
+
                 display: inline-flex;
                 padding: 4px 10px;
                 border-radius: 6px;

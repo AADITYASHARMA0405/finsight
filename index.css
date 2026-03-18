@@ -110,7 +110,6 @@ h1, h2, h3, h4, h5, h6 {
    Layout
    ========================================================================== */
 .app-container {
-    display: flex;
     min-height: 100vh;
 }
 
@@ -219,11 +218,12 @@ h1, h2, h3, h4, h5, h6 {
    Main Content
    ========================================================================== */
 .main-content {
-    flex: 1;
-    margin-left: 260px;
+    margin-left: 260px; /* Offset for fixed sidebar */
     padding: 40px 48px;
-    max-width: 1280px; /* Reduced from 1400px to prevent stretching */
-    margin-right: auto; /* Centering if flexible */
+    max-width: 1280px; 
+    margin-right: auto;
+    position: relative;
+    /* width: auto (default) ensures it fills the rest of the space without blowing out */
 }
 
 /* Header */
