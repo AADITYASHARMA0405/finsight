@@ -528,7 +528,8 @@ function ensureDocumentStyles() {
                 margin-bottom: 24px;
             }
             .upload-zone:hover {
-                background-color: rgba(16, 185, 129, 0.05);
+                background-color: rgba(79, 70, 229, 0.05); /* Indigo tint */
+                border-color: var(--accent-indigo);
             }
             .upload-icon {
                 font-size: 3rem;
@@ -565,7 +566,7 @@ function ensureDocumentStyles() {
             }
             .progress-fill {
                 height: 100%;
-                background: var(--accent-emerald);
+                background: var(--accent-indigo);
                 transition: width 0.3s ease;
             }
 
