@@ -6,8 +6,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('./db/database');
 const multer = require('multer');
+require('dotenv').config();
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET || 'finsight-super-secret-key-2026';
 
@@ -136,14 +140,49 @@ app.post('/api/documents/upload', verifyToken, upload.single('file'), (req, res)
         // Log Upload action
         db.run(`INSERT INTO audit_logs (user, action, details, status, time, initials) VALUES (?, ?, ?, 'Success', 'Just now', ?)`, [req.user.name, 'Document Upload', fileName, req.user.name.substring(0,2).toUpperCase()]);
 
-        // Simulate processing delay of 3 seconds, then update to Analyzed
-        setTimeout(() => {
-            const anomalies = Math.random() > 0.7 ? Math.floor(Math.random() * 3) + 1 : 0;
-            const threatLevel = anomalies > 0 ? (anomalies > 1 ? 'High' : 'Medium') : 'Clean';
-            db.run(`UPDATE documents SET status = 'Analyzed', anomalies = ?, threatLevel = ? WHERE id = ?`, [anomalies, threatLevel, newId], (err) => {
-                if (err) console.error("Failed to update process status", err);
-            });
-        }, 3000);
+        // ==========================================
+        // TRUE AI ANALYSIS (Gemini 1.5 Flash)
+        // ==========================================
+        (async () => {
+            try {
+                const fs = require('fs');
+                const fileBuffer = fs.readFileSync(req.file.path);
+                
+                const prompt = `
+                    Analyze this financial document (${fileName}).
+                    Return a JSON object with:
+                    1. "summary": A 1-sentence summary.
+                    2. "anomalies": An integer count (0-5) of potential risks or data mismatches.
+                    3. "threatLevel": "Clean", "Medium", or "High".
+                    4. "metrics": An array of {label, value, change} for key figures like Revenue, Profit, etc.
+                    Strictly return ONLY the JSON.
+                `;
+
+                const result = await model.generateContent([
+                    prompt,
+                    {
+                        inlineData: {
+                            data: fileBuffer.toString("base64"),
+                            mimeType: req.file.mimetype
+                        }
+                    }
+                ]);
+
+                const responseText = result.response.text();
+                // Extract JSON if model wraps it in markdown blocks
+                const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                const aiResult = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+
+                db.run(`UPDATE documents SET status = 'Analyzed', anomalies = ?, threatLevel = ?, ai_data = ? WHERE id = ?`, 
+                    [aiResult.anomalies || 0, aiResult.threatLevel || 'Clean', JSON.stringify(aiResult), newId]);
+                
+                // Content cleanup
+                fs.unlinkSync(req.file.path);
+            } catch (err) {
+                console.error("Gemini Analysis Failed:", err);
+                db.run(`UPDATE documents SET status = 'Analysis Failed' WHERE id = ?`, [newId]);
+            }
+        })();
     });
     stmt.finalize();
 });
@@ -179,12 +218,13 @@ app.get('/api/documents/:id/details', verifyToken, (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!row) return res.status(404).json({ error: "Document not found" });
 
-        const anomalies = row.anomalies > 0 ? [`Found ${row.anomalies} irregularities in vendor processing based on cross-checks.`] : [];
+        const aiData = row.ai_data ? JSON.parse(row.ai_data) : null;
+        const anomalies = aiData ? [aiData.summary, ...(aiData.anomalies > 0 ? [`Found ${aiData.anomalies} specific irregularities flagged by Gemini.`] : [])] : (row.anomalies > 0 ? [`Found ${row.anomalies} irregularities in vendor processing based on cross-checks.`] : []);
         
         res.json({
             id: row.id,
             name: row.name,
-            metrics: [
+            metrics: aiData ? aiResultToMetrics(aiData.metrics) : [
                 { label: "Total Revenue", value: "₹1,24,000", change: "+5%" },
                 { label: "Processed Items", value: "342", change: "+12%" },
             ],
@@ -193,18 +233,34 @@ app.get('/api/documents/:id/details', verifyToken, (req, res) => {
     });
 });
 
-// AI Query Mock
-app.post('/api/ai/query', verifyToken, (req, res) => {
-    const responses = [
-        "Based on the analysis, this looks perfectly normal and within 95% confidence intervals.",
-        "There's a subtle deviation here. Typically, payroll matches the roster count, but we show a mismatch of 2 entities.",
-        "The tax forms attached suggest a missing schedule C.",
-        "Everything checks out. The signatures appear completely valid and timestamped."
-    ];
-    // Artificial AI processing delay
-    setTimeout(() => {
-        res.json({ answer: responses[Math.floor(Math.random() * responses.length)] });
-    }, 1000);
+function aiResultToMetrics(metrics) {
+    if (!metrics || !Array.isArray(metrics)) return [];
+    return metrics.map(m => ({
+        label: m.label || "Metric",
+        value: m.value || "0",
+        change: m.change || "N/A"
+    }));
+}
+
+// AI Query Gemini
+app.post('/api/ai/query', verifyToken, async (req, res) => {
+    const { query, docId } = req.body;
+    
+    try {
+        let context = "You are FinSight AI assistants.";
+        if (docId) {
+            const doc = await new Promise((resolve, reject) => {
+                db.get('SELECT * FROM documents WHERE id = ?', [docId], (err, row) => err ? reject(err) : resolve(row));
+            });
+            if (doc && doc.ai_data) context += ` The user is asking about document: ${doc.name}. Context: ${doc.ai_data}`;
+        }
+
+        const result = await model.generateContent(`${context}\n\nUser Question: ${query}`);
+        res.json({ answer: result.response.text() });
+    } catch (err) {
+        console.error("AI Query Failed:", err);
+        res.status(500).json({ error: "AI Assistant unavailable" });
+    }
 });
 
 
