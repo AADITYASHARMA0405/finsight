@@ -25,7 +25,11 @@ export function renderOverview(container) {
                     <span>Search or type command...</span>
                     <div class="search-hint">⌘K</div>
                 </div>
+                <button class="icon-btn theme-toggle-btn" id="header-theme-toggle" aria-label="Toggle Theme">
+                    <i class="ph ph-moon"></i>
+                </button>
                 <button class="text-btn" id="customize-dashboard-btn" style="border: 1px solid var(--border-light); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+
 
                     <i class="ph ph-sliders"></i> Customize
                 </button>

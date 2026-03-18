@@ -22,7 +22,11 @@ export function renderDocuments(container) {
                     <i class="ph ph-magnifying-glass"></i>
                     <input type="text" id="document-search" placeholder="Search filename or status...">
                 </div>
+                <button class="icon-btn theme-toggle-btn" id="header-theme-toggle" aria-label="Toggle Theme" style="margin-left: 12px;">
+                    <i class="ph ph-moon"></i>
+                </button>
                 <button class="icon-btn" id="export-docs-btn" aria-label="Export Document List" style="margin-left: 12px;">
+
                     <i class="ph ph-download-simple"></i>
                 </button>
             </div>

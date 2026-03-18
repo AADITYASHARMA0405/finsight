@@ -24,50 +24,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchService = initCommandPalette();
 
     // Theme Persistence Layer
-    const themeToggle = document.getElementById('global-theme-toggle');
     const savedTheme = localStorage.getItem('theme') || 'light';
     
     const applyTheme = (theme) => {
-        if (theme === 'dark') {
+        const isDark = theme === 'dark';
+        if (isDark) {
             document.body.classList.add('dark-theme');
-            if (themeToggle) {
-                const icon = themeToggle.querySelector('i');
-                const text = themeToggle.querySelector('span');
-                if (icon) icon.className = 'ph ph-sun';
-                if (text) text.textContent = 'Light Mode';
-            }
         } else {
             document.body.classList.remove('dark-theme');
-            if (themeToggle) {
-                const icon = themeToggle.querySelector('i');
-                const text = themeToggle.querySelector('span');
-                if (icon) icon.className = 'ph ph-moon';
-                if (text) text.textContent = 'Dark Mode';
-            }
         }
+
+        // Sync all theme toggle buttons on the page
+        document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+            const icon = btn.querySelector('i');
+            if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+            
+            // Optional: if it has a span (like in a menu)
+            const span = btn.querySelector('span');
+            if (span) span.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        });
     };
 
     applyTheme(savedTheme);
 
-    if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
+    // Global listener for dynamic buttons
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.theme-toggle-btn');
+        if (btn) {
             const isDark = document.body.classList.toggle('dark-theme');
             const newTheme = isDark ? 'dark' : 'light';
             localStorage.setItem('theme', newTheme);
             applyTheme(newTheme);
             window.dispatchEvent(new Event('themeChanged'));
-        });
-    }
+        }
+    });
 
-    // Global Logout from Sidebar
-    const sidebarLogout = document.getElementById('sidebar-logout-btn');
-    if (sidebarLogout) {
-        sidebarLogout.onclick = () => {
-            localStorage.removeItem('finsight_token');
-            localStorage.removeItem('finsight_user');
-            window.location.href = 'login.html';
-        };
-    }
+    // Handle external theme changes
+    window.addEventListener('themeChanged', () => {
+        applyTheme(localStorage.getItem('theme'));
+    });
 
     // Global Command Palette Shortcut Listener (K) is already in search.js
     // exposing search globally just in case view needs it

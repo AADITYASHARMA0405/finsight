@@ -222,7 +222,8 @@ h1, h2, h3, h4, h5, h6 {
     flex: 1;
     margin-left: 260px;
     padding: 40px 48px;
-    max-width: 1400px;
+    max-width: 1280px; /* Reduced from 1400px to prevent stretching */
+    margin-right: auto; /* Centering if flexible */
 }
 
 /* Header */
