@@ -38,25 +38,25 @@ export function renderSettings(container) {
                 <div class="settings-form">
                     <div class="form-group">
                         <div class="profile-avatar large">
-                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="User Profile">
+                            <img id="profile-img-preview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="User Profile">
                         </div>
-                        <button class="text-btn small">Change Photo</button>
+                        <button class="text-btn small" id="change-photo-btn">Change Photo</button>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group flex-1">
                             <label>First Name</label>
-                            <input type="text" class="form-input" value="Sarah">
+                            <input type="text" id="setting-fname" class="form-input" value="Sarah">
                         </div>
                         <div class="form-group flex-1">
                             <label>Last Name</label>
-                            <input type="text" class="form-input" value="Connor">
+                            <input type="text" id="setting-lname" class="form-input" value="Connor">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" class="form-input" value="sarah@finsight.io">
+                        <input type="email" id="setting-email" class="form-input" value="sarah@finsight.io">
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@ export function renderSettings(container) {
                             <span class="setting-desc">Receive daily ARR summaries.</span>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="notif-toggle" checked>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -108,7 +108,7 @@ function initializeSettingsLogic() {
         newBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
     }
 
-    // 2. Ensure CSS specifically for settings page forms and toggles exists
+    // 2. Ensure CSS
     ensureSettingsStyles();
 
     // 3. Staggered Animations
@@ -118,7 +118,60 @@ function initializeSettingsLogic() {
         el.style.transform = 'translateY(0)';
     });
 
-    // 4. Initialize Theme Toggle Logic
+    // 4. Load Saved Data
+    const saveBtn = document.querySelector('.header-right .text-btn');
+    const fNameInput = document.getElementById('setting-fname');
+    const lNameInput = document.getElementById('setting-lname');
+    const emailInput = document.getElementById('setting-email');
+    const notifToggle = document.getElementById('notif-toggle');
+    const photoBtn = document.getElementById('change-photo-btn');
+    const profileImg = document.getElementById('profile-img-preview');
+
+    if (fNameInput) fNameInput.value = localStorage.getItem('user_fname') || 'Sarah';
+    if (lNameInput) lNameInput.value = localStorage.getItem('user_lname') || 'Connor';
+    if (emailInput) emailInput.value = localStorage.getItem('user_email') || 'sarah@finsight.io';
+    if (notifToggle) notifToggle.checked = localStorage.getItem('user_notifs') !== 'false';
+    if (profileImg) profileImg.src = localStorage.getItem('user_photo') || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80';
+
+    // 5. Save Logic
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            saveBtn.textContent = 'Saving...';
+            setTimeout(() => {
+                localStorage.setItem('user_fname', fNameInput.value);
+                localStorage.setItem('user_lname', lNameInput.value);
+                localStorage.setItem('user_email', emailInput.value);
+                localStorage.setItem('user_notifs', notifToggle.checked);
+                
+                saveBtn.textContent = 'Save Changes';
+                if (window.showToast) window.showToast('Settings saved successfully', 'success');
+            }, 600);
+        });
+    }
+
+    // 6. Change Photo Logic (Simulated)
+    if (photoBtn) {
+        photoBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        profileImg.src = e.target.result;
+                        localStorage.setItem('user_photo', e.target.result);
+                        if (window.showToast) window.showToast('Profile photo updated', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        });
+    }
+
+    // 7. Initialize Theme Toggle Logic
     const themeToggle = document.getElementById('theme-toggle');
     const headerThemeBtn = document.getElementById('header-theme-toggle');
 
@@ -140,9 +193,8 @@ function initializeSettingsLogic() {
         window.dispatchEvent(new Event('themeChanged'));
     };
 
-    if (themeToggle) themeToggle.onchange = toggleTheme;
-    if (headerThemeBtn) headerThemeBtn.onclick = toggleTheme;
-
+    if (themeToggle) themeToggle.addEventListener('change', toggleTheme);
+    if (headerThemeBtn) headerThemeBtn.addEventListener('click', toggleTheme);
     window.addEventListener('themeChanged', updateAllThemeUIs);
 }
 
